@@ -35,6 +35,6 @@ Detta projekt är licensierat under **MIT License**.
 
 ---
 
-### SEO-nyckelord (Svenska)
+### SEO-nyckelord 
 
 SchoolSoft, schema, CSV, konverterare, Google Kalender, importera schema, skolschema, lektionsplan, SchoolSoft till kalender, automatisera schema, schemahantering, schema-verktyg, Gemini AI, elevschema, lärarschema, veckoschema, v41, v42, schema till CSV, färgkodat schema, digitalt schema.
