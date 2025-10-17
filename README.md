@@ -4,7 +4,7 @@ Ett enkelt och kraftfullt webbverktyg som använder AI för att omedelbart konve
 
 ---
 
-*Här kan du lägga till en skärmdump eller GIF av verktyget.*
+<img width="555" height="618" alt="image" src="https://github.com/user-attachments/assets/cc417fc9-a769-4cc7-8aef-a0a40dd8684d" />
 
 ---
 
