@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SchoolSoft Schedule to .csv</title>
+    <title>SchoolSoft Schema till .csv</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,6 @@
     <style>
         :root {
             --ease-1: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            --ease-2: cubic-bezier(0.55, 0.085, 0.68, 0.53);
             --bg-color: #f4f7fc;
             --container-bg: #ffffff;
             --text-primary: #1d2a3b;
@@ -124,6 +123,21 @@
         body.dark-mode #theme-toggle .sun { display: none; }
         body.dark-mode #theme-toggle .moon { display: block; }
         
+        #lang-switcher {
+            position: absolute; top: 20px; left: 20px; display: flex;
+            background-color: var(--progress-bg); border-radius: 99px; padding: 4px;
+            border: 1px solid var(--border-color);
+        }
+        #lang-switcher span {
+            padding: 4px 12px; font-size: 0.8rem; font-weight: 600;
+            border-radius: 99px; cursor: pointer; color: var(--text-secondary);
+            transition: color 0.3s var(--ease-1);
+        }
+        #lang-switcher span.active {
+            background-color: var(--container-bg); color: var(--text-primary);
+            box-shadow: 0 2px 5px -2px var(--shadow-color);
+        }
+
         footer { margin-top: 30px; font-size: 0.8rem; color: var(--text-secondary); opacity: 0.8; }
         footer a { color: var(--text-secondary); font-weight: 600; text-decoration: none; }
         footer a:hover { text-decoration: underline; }
@@ -131,38 +145,42 @@
 </head>
 <body>
     <div class="app-container">
+        <div id="lang-switcher">
+            <span data-lang="sv">SV</span>
+            <span data-lang="en">EN</span>
+        </div>
         <button id="theme-toggle" title="Toggle theme">
             <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
             <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         </button>
 
         <header>
-            <h1>Schedule Converter</h1>
-            <p>Instantly convert your SchoolSoft schedule to a color-coded CSV file.</p>
+            <h1 data-key="title"></h1>
+            <p data-key="subtitle"></p>
         </header>
 
         <main>
             <section class="form-group">
-                <label for="apiKey">Google AI API Key</label>
+                <label for="apiKey" data-key="apiKeyLabel"></label>
                 <input type="password" id="apiKey" value="AIzaSyDm0PRZYmdwG2xjN7M5tkosaDlMtHBFrp8">
             </section>
 
             <section class="form-group">
-                <label for="modelSelect">AI Model</label>
+                <label for="modelSelect" data-key="modelLabel"></label>
                 <select id="modelSelect">
-                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Efficient)</option>
-                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Most Powerful)</option>
+                    <option value="gemini-2.5-flash" data-key="modelFlash"></option>
+                    <option value="gemini-2.5-pro" data-key="modelPro"></option>
                 </select>
             </section>
 
             <section class="form-group">
-                <label for="fileInput">Schedule File</label>
+                <label for="fileInput" data-key="fileLabel"></label>
                 <input type="file" id="fileInput" accept="image/*, application/pdf">
-                <label for="fileInput" class="file-dropzone" id="fileLabel">
+                <label for="fileInput" class="file-dropzone" id="fileDropzone">
                     <div class="icon" id="fileIcon">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                     </div>
-                    <span id="fileLabelText">Click or Drag & Drop File</span>
+                    <span id="fileLabelText" data-key="fileDropText"></span>
                 </label>
             </section>
             
@@ -174,32 +192,120 @@
                 <div id="status"></div>
             </div>
 
-            <button id="convertBtn">Convert to CSV</button>
+            <button id="convertBtn" data-key="convertBtn"></button>
         </main>
 
         <footer>
-            <p class="footer">Powered by <a href="https://ai.google.dev/" target="_blank">Gemini AI</a></p>
+            <p class="footer" data-key="footerText"></p>
         </footer>
     </div>
 
     <script>
+        const translations = {
+            sv: {
+                title: "Schema-konverterare",
+                subtitle: "Konvertera ditt SchoolSoft-schema från PDF/Bild.",
+                apiKeyLabel: "Google AI API-nyckel",
+                modelLabel: "AI-modell",
+                modelFlash: "Gemini 2.5 Flash (Snabb & Effektiv)",
+                modelPro: "Gemini 2.5 Pro (Mest Kraftfull)",
+                fileLabel: "Schemafil",
+                fileDropText: "Klicka eller Dra & Släpp Filen Här",
+                fileDropTextSelected: "Vald fil: ",
+                convertBtn: "Konvertera till CSV",
+                footerText: "Drivs av ",
+                initialStatus: "Välj en fil för att börja.",
+                readyStatus: "Redo att konvertera.",
+                progressStep1: "Laddar upp schema...",
+                progressStep2: "Förbereder för AI...",
+                progressStep3: "Analyserar schemat... (detta är det längsta steget)",
+                progressStep4: "Konverterar svar till CSV...",
+                progressComplete: "Konvertering slutförd!",
+                successMessage: "Klart! Din schedule.csv har laddats ner.",
+                errorReadingFile: "Fel vid läsning av fil.",
+                errorApiKey: "Fel: API-nyckel saknas.",
+                errorNoFile: "Fel: Ingen fil vald.",
+                errorGeneric: "Ett fel uppstod: "
+            },
+            en: {
+                title: "Schedule Converter",
+                subtitle: "Convert your SchoolSoft schedule from PDF/Image.",
+                apiKeyLabel: "Google AI API Key",
+                modelLabel: "AI Model",
+                modelFlash: "Gemini 2.5 Flash (Fast & Efficient)",
+                modelPro: "Gemini 2.5 Pro (Most Powerful)",
+                fileLabel: "Schedule File",
+                fileDropText: "Click or Drag & Drop File Here",
+                fileDropTextSelected: "Selected: ",
+                convertBtn: "Convert to CSV",
+                footerText: "Powered by ",
+                initialStatus: "Please select a file to begin.",
+                readyStatus: "Ready to convert.",
+                progressStep1: "Uploading schedule...",
+                progressStep2: "Processing for AI...",
+                progressStep3: "Analyzing the schedule... (this is the longest step)",
+                progressStep4: "Converting response to CSV...",
+                progressComplete: "Conversion completed!",
+                successMessage: "Success! Your schedule.csv has been downloaded.",
+                errorReadingFile: "Error reading the file.",
+                errorApiKey: "Error: API key is missing.",
+                errorNoFile: "Error: No file selected.",
+                errorGeneric: "An error occurred: "
+            }
+        };
+
         const apiKeyInput = document.getElementById('apiKey');
         const modelSelect = document.getElementById('modelSelect');
         const fileInput = document.getElementById('fileInput');
         const convertBtn = document.getElementById('convertBtn');
         const statusDiv = document.getElementById('status');
-        const fileLabel = document.getElementById('fileLabel');
+        const fileLabel = document.getElementById('fileDropzone');
         const fileLabelText = document.getElementById('fileLabelText');
         const fileIcon = document.getElementById('fileIcon');
         const feedbackSection = document.getElementById('feedbackSection');
         const progressBar = document.getElementById('progressBar');
         const progressFeedback = document.getElementById('progress-feedback');
         const themeToggle = document.getElementById('theme-toggle');
+        const langSwitcher = document.getElementById('lang-switcher');
         
         let fileContent = null;
         let fileMimeType = '';
         let progressTimeouts = [];
+        let currentLang = 'sv';
 
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            const t = translations[lang];
+
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.dataset.key;
+                if (t[key]) {
+                    if (el.tagName === 'P' && key === 'footerText') {
+                        el.innerHTML = `${t[key]}<a href="https://ai.google.dev/" target="_blank">Gemini AI</a>`;
+                    } else {
+                        el.textContent = t[key];
+                    }
+                }
+            });
+            updateStatus(t.initialStatus, '');
+        }
+
+        function updateSwitcherUI(lang) {
+            document.querySelectorAll('#lang-switcher span').forEach(span => {
+                span.classList.toggle('active', span.dataset.lang === lang);
+            });
+        }
+
+        langSwitcher.addEventListener('click', (e) => {
+            const lang = e.target.dataset.lang;
+            if (lang && lang !== currentLang) {
+                localStorage.setItem('language', lang);
+                setLanguage(lang);
+                updateSwitcherUI(lang);
+            }
+        });
+        
         convertBtn.addEventListener('click', convertSchedule);
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => fileLabel.addEventListener(eventName, preventDefaults, false));
         function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
@@ -212,7 +318,7 @@
         function processFile(file) {
             if (!file) {
                 fileContent = null;
-                fileLabelText.textContent = 'Click or Drag & Drop File';
+                fileLabelText.textContent = translations[currentLang].fileDropText;
                 fileIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`;
                 return;
             }
@@ -222,10 +328,11 @@
             reader.onload = (e) => {
                 fileContent = e.target.result.split(',')[1];
                 fileMimeType = file.type;
-                fileLabelText.textContent = `Selected: ${file.name}`;
+                fileLabelText.textContent = `${translations[currentLang].fileDropTextSelected}${file.name}`;
                 fileIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+                updateStatus(translations[currentLang].readyStatus, '');
             };
-            reader.onerror = () => { updateStatus('Error reading the file.', 'error'); fileContent = null; };
+            reader.onerror = () => { updateStatus(translations[currentLang].errorReadingFile, 'error'); fileContent = null; };
             reader.readAsDataURL(file);
         }
 
@@ -236,11 +343,12 @@
             statusDiv.innerHTML = '';
             updateProgress(0, '');
             
+            const t = translations[currentLang];
             const steps = [
-                { delay: 100, percent: 15, text: "Uploading schedule..." },
-                { delay: 1000, percent: 40, text: "Processing for AI..." },
-                { delay: 4000, percent: 75, text: "Analyzing schedule... (this is the longest step)" },
-                { delay: 10000, percent: 95, text: "Converting response to CSV..." }
+                { delay: 100, percent: 15, text: t.progressStep1 },
+                { delay: 1000, percent: 40, text: t.progressStep2 },
+                { delay: 4000, percent: 75, text: t.progressStep3 },
+                { delay: 10000, percent: 95, text: t.progressStep4 }
             ];
 
             steps.forEach(step => {
@@ -262,8 +370,9 @@
         }
 
         async function convertSchedule() {
-            if (!apiKeyInput.value.trim()) { updateStatus('Error: API key is missing.', 'error'); return; }
-            if (!fileContent) { updateStatus('Error: No file selected.', 'error'); return; }
+            const t = translations[currentLang];
+            if (!apiKeyInput.value.trim()) { updateStatus(t.errorApiKey, 'error'); return; }
+            if (!fileContent) { updateStatus(t.errorNoFile, 'error'); return; }
 
             convertBtn.disabled = true;
             startRealisticProgress();
@@ -292,16 +401,16 @@
                 if (!Array.isArray(scheduleData) || scheduleData.length === 0) { throw new Error("AI returned no valid schedule entries."); }
                 
                 progressTimeouts.forEach(clearTimeout);
-                updateProgress(100, 'Conversion completed!');
+                updateProgress(100, t.progressComplete);
 
                 const csvContent = convertToCSV(scheduleData);
                 downloadCSV(csvContent, 'schedule.csv');
-                updateStatus('Success! Your schedule.csv has been downloaded.', 'success');
+                updateStatus(t.successMessage, 'success');
 
             } catch (error) {
                 console.error('Error:', error);
                 feedbackSection.style.display = 'none';
-                updateStatus(`An error occurred: ${error.message}`, 'error');
+                updateStatus(`${t.errorGeneric}${error.message}`, 'error');
             } finally {
                 convertBtn.disabled = false;
             }
@@ -381,10 +490,15 @@
             localStorage.setItem('theme', newTheme);
             applyTheme(newTheme);
         }
+        
         (function() {
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) { applyTheme(savedTheme); } 
             else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { applyTheme('dark'); }
+            
+            const savedLang = localStorage.getItem('language') || 'sv';
+            setLanguage(savedLang);
+            updateSwitcherUI(savedLang);
         })();
     </script>
 </body>
