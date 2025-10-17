@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolSoft Schedule to .csv</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ease-1: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --ease-2: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+            --bg-color: #f4f7fc;
+            --container-bg: #ffffff;
+            --text-primary: #1d2a3b;
+            --text-secondary: #5a677b;
+            --border-color: #e2e8f0;
+            --input-bg: #f8fafc;
+            --progress-bg: #e2e8f0;
+            --shadow-color: rgba(60, 64, 67, 0.15);
+            --brand-color: #4f46e5;
+        }
+
+        body.dark-mode {
+            --bg-color: #0d1117;
+            --container-bg: #161b22;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+            --input-bg: #0d1117;
+            --progress-bg: #21262d;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.4s var(--ease-1), color 0.4s var(--ease-1);
+        }
+
+        .app-container {
+            position: relative;
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px -10px var(--shadow-color);
+            text-align: center;
+            max-width: 550px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.4s var(--ease-1);
+            animation: fadeIn 0.8s var(--ease-1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        header { margin-bottom: 30px; }
+        header h1 { margin: 0; font-weight: 700; font-size: 1.8rem; color: var(--text-primary); }
+        header p { margin: 8px 0 0; color: var(--text-secondary); font-size: 1rem; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: var(--text-secondary); }
+
+        input[type="password"], select {
+            width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-color);
+            box-sizing: border-box; font-size: 1rem; transition: all 0.3s var(--ease-1); background-color: var(--input-bg);
+            color: var(--text-primary);
+        }
+        input[type="password"]:focus, select:focus {
+            border-color: var(--brand-color); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); outline: none;
+        }
+        
+        input[type="file"] { display: none; }
+        
+        .file-dropzone {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 12px; width: 100%; padding: 30px; border-radius: 12px;
+            border: 2px dashed var(--border-color); box-sizing: border-box; font-size: 1rem;
+            cursor: pointer; text-align: center; color: var(--text-secondary);
+            transition: all 0.3s var(--ease-1);
+        }
+        .file-dropzone.drag-over { border-color: var(--brand-color); background-color: rgba(79, 70, 229, 0.05); }
+        .file-dropzone .icon { color: var(--brand-color); transition: transform 0.3s var(--ease-1); }
+        .file-dropzone:hover .icon { transform: scale(1.1); }
+        .file-dropzone span { font-weight: 500; }
+
+        button#convertBtn {
+            width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 600;
+            cursor: pointer; font-size: 1.1rem; color: #ffffff;
+            background: var(--brand-color);
+            transition: all 0.3s var(--ease-1); box-shadow: 0 4px 15px -5px rgba(79, 70, 229, 0.4);
+        }
+        button#convertBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 7px 20px -5px rgba(79, 70, 229, 0.5); }
+        button#convertBtn:disabled { background: #9ca3af; cursor: not-allowed; box-shadow: none; }
+
+        .feedback-section { display: none; margin-top: 25px; }
+        #progress-feedback { text-align: left; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-secondary); height: 1.2em; transition: color 0.3s; }
+        .progress-bar-container { width: 100%; height: 8px; background-color: var(--progress-bg); border-radius: 4px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background-color: var(--brand-color); border-radius: 4px; transition: width 0.4s var(--ease-1); }
+        #status { margin-top: 15px; font-weight: 500; min-height: 24px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: color 0.3s; }
+        .status-success { color: #16a34a; }
+        .status-error { color: #dc2626; }
+
+        #theme-toggle {
+            position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer;
+            color: var(--text-secondary); padding: 5px; border-radius: 50%; transition: all 0.3s var(--ease-1);
+        }
+        #theme-toggle:hover { color: var(--text-primary); background-color: var(--progress-bg); }
+        #theme-toggle .moon { display: none; }
+        body.dark-mode #theme-toggle .sun { display: none; }
+        body.dark-mode #theme-toggle .moon { display: block; }
+        
+        footer { margin-top: 30px; font-size: 0.8rem; color: var(--text-secondary); opacity: 0.8; }
+        footer a { color: var(--text-secondary); font-weight: 600; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <button id="theme-toggle" title="Toggle theme">
+            <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+
+        <header>
+            <h1>Schedule Converter</h1>
+            <p>Instantly convert your SchoolSoft schedule to a color-coded CSV file.</p>
+        </header>
+
+        <main>
+            <section class="form-group">
+                <label for="apiKey">Google AI API Key</label>
+                <input type="password" id="apiKey" value="AIzaSyDm0PRZYmdwG2xjN7M5tkosaDlMtHBFrp8">
+            </section>
+
+            <section class="form-group">
+                <label for="modelSelect">AI Model</label>
+                <select id="modelSelect">
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Efficient)</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Most Powerful)</option>
+                </select>
+            </section>
+
+            <section class="form-group">
+                <label for="fileInput">Schedule File</label>
+                <input type="file" id="fileInput" accept="image/*, application/pdf">
+                <label for="fileInput" class="file-dropzone" id="fileLabel">
+                    <div class="icon" id="fileIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    </div>
+                    <span id="fileLabelText">Click or Drag & Drop File</span>
+                </label>
+            </section>
+            
+            <div class="feedback-section" id="feedbackSection">
+                <p id="progress-feedback"></p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div id="status"></div>
+            </div>
+
+            <button id="convertBtn">Convert to CSV</button>
+        </main>
+
+        <footer>
+            <p class="footer">Powered by <a href="https://ai.google.dev/" target="_blank">Gemini AI</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const apiKeyInput = document.getElementById('apiKey');
+        const modelSelect = document.getElementById('modelSelect');
+        const fileInput = document.getElementById('fileInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const statusDiv = document.getElementById('status');
+        const fileLabel = document.getElementById('fileLabel');
+        const fileLabelText = document.getElementById('fileLabelText');
+        const fileIcon = document.getElementById('fileIcon');
+        const feedbackSection = document.getElementById('feedbackSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressFeedback = document.getElementById('progress-feedback');
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        let fileContent = null;
+        let fileMimeType = '';
+        let progressTimeouts = [];
+
+        convertBtn.addEventListener('click', convertSchedule);
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => fileLabel.addEventListener(eventName, preventDefaults, false));
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(eventName => fileLabel.addEventListener(eventName, () => fileLabel.classList.add('drag-over'), false));
+        ['dragleave', 'drop'].forEach(eventName => fileLabel.addEventListener(eventName, () => fileLabel.classList.remove('drag-over'), false));
+        fileLabel.addEventListener('drop', (e) => processFile(e.dataTransfer.files[0]), false);
+        fileInput.addEventListener('change', (e) => processFile(e.target.files[0]));
+        themeToggle.addEventListener('click', toggleTheme);
+
+        function processFile(file) {
+            if (!file) {
+                fileContent = null;
+                fileLabelText.textContent = 'Click or Drag & Drop File';
+                fileIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`;
+                return;
+            }
+            feedbackSection.style.display = 'none';
+            statusDiv.innerHTML = '';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                fileContent = e.target.result.split(',')[1];
+                fileMimeType = file.type;
+                fileLabelText.textContent = `Selected: ${file.name}`;
+                fileIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+            };
+            reader.onerror = () => { updateStatus('Error reading the file.', 'error'); fileContent = null; };
+            reader.readAsDataURL(file);
+        }
+
+        function startRealisticProgress() {
+            progressTimeouts.forEach(clearTimeout);
+            progressTimeouts = [];
+            feedbackSection.style.display = 'block';
+            statusDiv.innerHTML = '';
+            updateProgress(0, '');
+            
+            const steps = [
+                { delay: 100, percent: 15, text: "Uploading schedule..." },
+                { delay: 1000, percent: 40, text: "Processing for AI..." },
+                { delay: 4000, percent: 75, text: "Analyzing schedule... (this is the longest step)" },
+                { delay: 10000, percent: 95, text: "Converting response to CSV..." }
+            ];
+
+            steps.forEach(step => {
+                progressTimeouts.push(setTimeout(() => updateProgress(step.percent, step.text), step.delay));
+            });
+        }
+
+        function updateProgress(percent, text) {
+            progressBar.style.width = `${percent}%`;
+            progressFeedback.textContent = text;
+        }
+        
+        function getMondayOfIsoWeek(w, y) {
+            const date = new Date(Date.UTC(y, 0, 1 + (w - 1) * 7));
+            const day = date.getUTCDay();
+            const dayCorrection = (day === 0) ? -6 : 1 - day;
+            date.setUTCDate(date.getUTCDate() + dayCorrection);
+            return date;
+        }
+
+        async function convertSchedule() {
+            if (!apiKeyInput.value.trim()) { updateStatus('Error: API key is missing.', 'error'); return; }
+            if (!fileContent) { updateStatus('Error: No file selected.', 'error'); return; }
+
+            convertBtn.disabled = true;
+            startRealisticProgress();
+
+            const apiKey = apiKeyInput.value.trim();
+            const model = modelSelect.value;
+            const API_URL = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+            const prompt = `You are a world-class data extraction AI specializing in school schedules. Your task is to analyze the provided file and convert it into a structured format. The output MUST be a valid JSON array of objects. Do not include any text before or after the JSON array. Do not use markdown. Each object represents one class and MUST contain these exact keys: "subject", "day", "startTime", "endTime", "location", "details", and "weekNumber". For "weekNumber", find the week identifier in the text (like "w41") and extract only the number (41). This "weekNumber" key must be present on every object in the array. All other rules still apply: use full day names, use strict HH:MM 24-hour format for times, and use an empty string "" for any missing information.`;
+            const requestBody = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: fileMimeType, data: fileContent } }] }] };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `API request failed`); }
+                
+                const data = await response.json();
+                if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error("The AI returned an empty or invalid response."); }
+                
+                const jsonText = data.candidates[0].content.parts[0].text;
+                const cleanedJsonText = jsonText.replace(/^```json\s*|```\s*$/g, '').trim();
+                const scheduleData = JSON.parse(cleanedJsonText);
+                
+                if (!Array.isArray(scheduleData) || scheduleData.length === 0) { throw new Error("AI returned no valid schedule entries."); }
+                
+                progressTimeouts.forEach(clearTimeout);
+                updateProgress(100, 'Conversion completed!');
+
+                const csvContent = convertToCSV(scheduleData);
+                downloadCSV(csvContent, 'schedule.csv');
+                updateStatus('Success! Your schedule.csv has been downloaded.', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                feedbackSection.style.display = 'none';
+                updateStatus(`An error occurred: ${error.message}`, 'error');
+            } finally {
+                convertBtn.disabled = false;
+            }
+        }
+        
+        function convertToCSV(jsonData) {
+            const headers = ['Subject', 'Start Date', 'Start Time', 'End Date', 'End Time', 'Location', 'Description', 'Color'];
+            const dayMap = { 'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4 };
+            
+            const subjectColorMap = new Map();
+            let colorIndex = 1;
+            jsonData.forEach(item => {
+                if (!subjectColorMap.has(item.subject)) {
+                    subjectColorMap.set(item.subject, colorIndex);
+                    colorIndex = (colorIndex % 11) + 1;
+                }
+            });
+
+            let baseMonday;
+            const weekNum = jsonData[0].weekNumber;
+            const currentYear = new Date().getFullYear();
+            if (weekNum && !isNaN(parseInt(weekNum))) {
+                baseMonday = getMondayOfIsoWeek(parseInt(weekNum), currentYear);
+            } else {
+                console.warn("Week number not found, falling back to current week's Monday.");
+                const today = new Date();
+                const day = today.getUTCDay();
+                const dayCorrection = (day === 0) ? -6 : 1 - day;
+                baseMonday = new Date(today);
+                baseMonday.setUTCDate(today.getUTCDate() + dayCorrection);
+            }
+
+            const rows = jsonData.map(item => {
+                const dayOffset = dayMap[item.day];
+                if (dayOffset === undefined) return null;
+                
+                const eventDate = new Date(baseMonday);
+                eventDate.setUTCDate(baseMonday.getUTCDate() + dayOffset);
+                const dateString = eventDate.toISOString().split('T')[0];
+                const itemColor = subjectColorMap.get(item.subject);
+
+                const rowData = [ item.subject, dateString, item.startTime, dateString, item.endTime, item.location, item.details, itemColor ];
+                return rowData.map(val => `"${(val || '').toString().replace(/"/g, '""')}"`).join(',');
+            }).filter(row => row !== null);
+
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        function downloadCSV(csvContent, fileName) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function updateStatus(message, type) {
+            let iconHtml = '';
+            switch(type) {
+                case 'success': iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`; break;
+                case 'error': iconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`; break;
+            }
+            statusDiv.innerHTML = `${iconHtml}<span>${message}</span>`;
+            statusDiv.className = `status-${type}`;
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') { document.body.classList.add('dark-mode'); } 
+            else { document.body.classList.remove('dark-mode'); }
+        }
+        function toggleTheme() {
+            const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        }
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) { applyTheme(savedTheme); } 
+            else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { applyTheme('dark'); }
+        })();
+    </script>
+</body>
+</html>
