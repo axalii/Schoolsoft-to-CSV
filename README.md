@@ -4,7 +4,7 @@ Ett enkelt och kraftfullt webbverktyg som använder AI för att omedelbart konve
 
 ---
 
-<img width="555" height="618" alt="image" src="https://github.com/user-attachments/assets/cc417fc9-a769-4cc7-8aef-a0a40dd8684d" />
+<img width="516" height="585" alt="image" src="https://github.com/user-attachments/assets/61f619a6-d656-4b4c-8db3-7e76b263a69b" />
 
 ---
 
